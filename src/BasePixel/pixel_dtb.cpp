@@ -374,6 +374,85 @@ void CTestboard::DisarmPixel(int col, int row)
 	roc_Pix_Mask(col,row);
 }
 
+int32_t CTestboard::SCurve(int32_t nTrig, int32_t dacReg, int32_t threshold, int32_t sCurve[])
+{
+	for (int i = 0; i < 256; i++) sCurve[i] = 0;
+
+	int start = threshold - 16;
+	if (start < 0) start = 0;
+	int stop = threshold + 16;
+	if (stop > 256) stop = 256;
+	for (int i = start; i < stop; i++)
+	{
+		sCurve[i] = CountReadouts(nTrig, dacReg, i);
+	}
+    return 1;
+}
+
+int32_t CTestboard::SCurve(int32_t nTrig, int32_t dacReg, int32_t thr[], int32_t chipId[], int32_t sCurve[])
+{
+	int dac;
+	for (int i = 0; i < 32; i++)
+	{
+		for (int iChip = 0; iChip < nRocs; iChip++)
+		{
+			SetChip(chipId[iChip]);
+			sCurve[i*nRocs + iChip] = 0;
+
+			dac = thr[iChip] - 16 + i;
+			if (dac < 0) dac = 0;
+			else if (dac > 255) dac = 255;
+			roc_SetDAC(dacReg, dac);
+		}
+		cDelay(1200);
+		if (i == 0) cDelay(1200);
+
+        sCurve[i] = CountReadouts(nTrig);
+	}
+    return 1;
+}
+
+
+int32_t CTestboard::SCurveColumn(int32_t iColumn, int32_t nTrig, int32_t dacReg, int32_t thr[], int32_t trim[], int32_t chipId[], int32_t sCurve[])
+{
+	int32_t buffer[nRocs*32], thresholds[nRocs];
+	long position = 0;
+
+	for (int iChip = 0; iChip < nRocs; iChip++)
+	{
+		SetChip(chipId[iChip]);
+  	    EnableColumn(iColumn);
+	}
+
+	for (int iRow = 0; iRow < ROC_NUMROWS; iRow++)
+	{
+		for (int iChip = 0; iChip < nRocs; iChip++)
+		{
+			thresholds[iChip] = thr[nRocs * iRow + iChip];
+			SetChip(chipId[iChip]);
+            ArmPixel(iColumn,iRow,trim[nRocs * iRow + iChip]);
+		}
+
+		SCurve(nTrig, dacReg, thresholds, chipId, buffer);
+
+		for (int iChip = 0; iChip < nRocs; iChip++)
+		{
+			SetChip(chipId[iChip]);
+ 		 	DisarmPixel(iColumn, iRow);
+		}
+
+		for (int i = 0; i < 32*nRocs; i++) sCurve[position + i] = buffer[i];
+		position+=32*nRocs;
+	}
+
+	for (int iChip = 0; iChip < nRocs; iChip++)
+	{
+		SetChip(chipId[iChip]);
+  	    roc_Col_Enable(iColumn, 0);
+	}
+    return 1;
+}
+
 void CTestboard::SetHubID(int32_t value)
 {
     hubId = value;
