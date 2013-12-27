@@ -450,7 +450,6 @@ public:
 	RPC_EXPORT int32_t CountReadouts(int32_t nTriggers, int32_t dacReg, int32_t dacValue);
 	RPC_EXPORT int32_t PixelThreshold(int32_t col, int32_t row, int32_t start, int32_t step, int32_t thrLevel, int32_t nTrig, int32_t dacReg, int32_t xtalk, int32_t cals, int32_t trim);
 	RPC_EXPORT int32_t ChipThreshold(int32_t start, int32_t step, int32_t thrLevel, int32_t nTrig, int32_t dacReg, int32_t xtalk, int32_t cals, int32_t &trim, int32_t &res);
-	RPC_EXPORT void ChipThresholdIntern(int32_t &start, int32_t step, int32_t thrLevel, int32_t nTrig, int32_t dacReg, int32_t xtalk, int32_t cals, int32_t &trim, int32_t &res);
 	RPC_EXPORT int32_t SCurve(int32_t nTrig, int32_t dacReg, int32_t threshold, int32_t &res);
     RPC_EXPORT int32_t SCurve(int32_t nTrig, int32_t dacReg, int32_t &thr, int32_t &chipId, int32_t &sCurve);
 	RPC_EXPORT int32_t SCurveColumn(int32_t column, int32_t nTrig, int32_t dacReg, int32_t &thr, int32_t &trims, int32_t &chipId, int32_t &res);
