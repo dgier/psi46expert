@@ -374,6 +374,21 @@ void CTestboard::DisarmPixel(int col, int row)
 	roc_Pix_Mask(col,row);
 }
 
+int32_t ChipThreshold(int32_t start, int32_t step, int32_t thrLevel, int32_t nTrig, int32_t dacReg, int32_t xtalk, int32_t cals, int32_t trim[], int32_t res[])
+{
+	vectorR<int32_t> trim_v, res_v;
+	
+	for(int i = 0; i < ROC_NUMROWS * ROC_NUMCOLS; i++) trim_v.push_back(trim[i]);
+	for(int i = 0; i < ROC_NUMROWS * ROC_NUMCOLS; i++) res_v.push_back(res[i]);
+
+	int32_t val = ChipThresholdConvert(start, step, thrLevel, nTrig, dacReg, xtalk, cals, &trim_v, &res_v);
+
+	for (int i = 0; i < ROC_NUMROWS * ROC_NUMCOLS; i++) trim[i] = trim_v(i);
+	for (int i = 0; i < ROC_NUMROWS * ROC_NUMCOLS; i++) res[i] = res_v(i);
+
+	return val;
+}
+
 int32_t CTestboard::SCurve(int32_t nTrig, int32_t dacReg, int32_t threshold, int32_t sCurve[])
 {
 	for (int i = 0; i < 256; i++) sCurve[i] = 0;
